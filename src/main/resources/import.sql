@@ -1,6 +1,5 @@
--- This file allow to write SQL commands that will be emitted in test and dev.
--- The commands are commented as their support depends of the database
--- insert into myentity (id, field) values(1, 'field-1');
--- insert into myentity (id, field) values(2, 'field-2');
--- insert into myentity (id, field) values(3, 'field-3');
--- alter sequence myentity_seq restart with 4;
+INSERT INTO tarefas (titulo, descricao, status, prioridade) VALUES
+  ('Revisar requisitos', 'Validar requisitos da sprint', 'ABERTA', 'ALTA'),
+  ('Implementar endpoint', 'Criar recurso de tarefas na API', 'EM_ANDAMENTO', 'ALTA'),
+  ('Testar integração', 'Executar testes de API com H2', 'CONCLUIDA', 'MEDIA'),
+  ('Documentar deploy', 'Preparar guia de execução local', 'ABERTA', 'BAIXA');

@@ -4,15 +4,11 @@ import aula.ada.domain.PrioridadeTarefa;
 import aula.ada.domain.StatusTarefa;
 import aula.ada.dto.TarefaRequest;
 import aula.ada.dto.TarefaResponse;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Default;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-@ApplicationScoped
-@Default
 public class Task1TarefaApiMemoria implements TarefaApi {
     private final ConcurrentHashMap<Long, TarefaResponse> dados = new ConcurrentHashMap<>();
     private final AtomicLong sequencia = new AtomicLong();
