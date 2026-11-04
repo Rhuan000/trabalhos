@@ -1,6 +1,7 @@
 package aula.ada.service;
 
 import aula.ada.api.TarefaNaoEncontradaException;
+import aula.ada.domain.StatusTarefa;
 import aula.ada.dto.TarefaRequest;
 import aula.ada.dto.TarefaResponse;
 import aula.ada.entity.TarefaEntity;
@@ -41,9 +42,15 @@ public class TarefaService {
         TarefaEntity entity = tarefaRepository.findByIdOptional(id)
                 .orElseThrow(() -> new TarefaNaoEncontradaException(id));
 
+        StatusTarefa novoStatus = request.getStatus();
+        if (entity.getStatus() == StatusTarefa.CANCELADA
+                && novoStatus == StatusTarefa.CONCLUIDA) {
+            throw new TransicaoTarefaInvalidaException(id, entity.getStatus(), novoStatus);
+        }
+
         entity.setTitulo(request.getTitulo());
         entity.setDescricao(request.getDescricao());
-        entity.setStatus(request.getStatus() == null ? entity.getStatus() : request.getStatus());
+        entity.setStatus(novoStatus == null ? entity.getStatus() : novoStatus);
         entity.setPrioridade(request.getPrioridade() == null ? entity.getPrioridade() : request.getPrioridade());
         tarefaRepository.getEntityManager().flush();
         return entity.toResponse();
