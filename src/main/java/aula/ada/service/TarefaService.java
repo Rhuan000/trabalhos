@@ -1,6 +1,5 @@
 package aula.ada.service;
 
-import aula.ada.api.TarefaNaoEncontradaException;
 import aula.ada.domain.StatusTarefa;
 import aula.ada.dto.TarefaRequest;
 import aula.ada.dto.TarefaResponse;

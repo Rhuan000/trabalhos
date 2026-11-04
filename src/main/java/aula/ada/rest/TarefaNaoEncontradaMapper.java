@@ -1,6 +1,6 @@
 package aula.ada.rest;
 
-import aula.ada.api.TarefaNaoEncontradaException;
+import aula.ada.service.TarefaNaoEncontradaException;
 import aula.ada.dto.ErroResponse;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
