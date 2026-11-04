@@ -1,52 +1,66 @@
 package aula.ada.service;
 
-import aula.ada.api.TarefaApi;
-import aula.ada.api.Task1TarefaApiMemoria;
+import aula.ada.api.TarefaNaoEncontradaException;
+import aula.ada.domain.StatusTarefa;
 import aula.ada.dto.TarefaRequest;
 import aula.ada.dto.TarefaResponse;
-import aula.ada.domain.StatusTarefa;
+import aula.ada.entity.TarefaEntity;
+import aula.ada.repository.TarefaRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
 @ApplicationScoped
-public class TarefaService implements TarefaApi {
-    private final Task1TarefaApiMemoria armazenamento;
+public class TarefaService {
 
     @Inject
-    public TarefaService(Task1TarefaApiMemoria armazenamento) {
-        this.armazenamento = armazenamento;
-    }
+    TarefaRepository tarefaRepository;
 
-    @Override
     public List<TarefaResponse> listar() {
-        return armazenamento.listar();
+        return tarefaRepository.listAll().stream()
+                .map(TarefaEntity::toResponse)
+                .toList();
     }
 
-    @Override
     public TarefaResponse buscar(long id) {
-        return armazenamento.buscar(id);
+        return tarefaRepository.findByIdOptional(id)
+                .orElseThrow(() -> new TarefaNaoEncontradaException(id))
+                .toResponse();
     }
 
-    @Override
+    @Transactional
     public TarefaResponse criar(TarefaRequest request) {
-        return armazenamento.criar(request);
+        TarefaEntity entity = TarefaEntity.from(request);
+        tarefaRepository.persist(entity);
+        return entity.toResponse();
     }
 
-    @Override
+    @Transactional
     public TarefaResponse atualizar(long id, TarefaRequest request) {
-        TarefaResponse atual = buscar(id);
+        TarefaEntity entity = tarefaRepository.findByIdOptional(id)
+                .orElseThrow(() -> new TarefaNaoEncontradaException(id));
+
         StatusTarefa novoStatus = request.getStatus();
-        if (atual.getStatus() == StatusTarefa.CANCELADA && novoStatus == StatusTarefa.CONCLUIDA) {
-            throw new TransicaoTarefaInvalidaException(id, atual.getStatus(), novoStatus);
+        if (entity.getStatus() == StatusTarefa.CANCELADA
+                && novoStatus == StatusTarefa.CONCLUIDA) {
+            throw new TransicaoTarefaInvalidaException(id, entity.getStatus(), novoStatus);
         }
-        return armazenamento.atualizar(id, request);
+
+        entity.setTitulo(request.getTitulo());
+        entity.setDescricao(request.getDescricao());
+        entity.setStatus(novoStatus == null ? entity.getStatus() : novoStatus);
+        entity.setPrioridade(request.getPrioridade() == null ? entity.getPrioridade() : request.getPrioridade());
+        tarefaRepository.getEntityManager().flush();
+        return entity.toResponse();
     }
 
-    @Override
+    @Transactional
     public void excluir(long id) {
-        buscar(id);
-        armazenamento.excluir(id);
+        boolean removido = tarefaRepository.deleteById(id);
+        if (!removido) {
+            throw new TarefaNaoEncontradaException(id);
+        }
     }
 }
